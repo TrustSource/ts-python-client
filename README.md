@@ -1,2 +1,2 @@
 # ecs-python-client
-A python client for ECS (https://ecs.eacg.de) to manage open source code compliance 
+A python client for TrustSource(ECS) (https://app.trustsource.io) to manage open source code compliance 

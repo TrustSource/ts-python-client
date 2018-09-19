@@ -5,9 +5,9 @@ setup(
 
     packages=['ecs_python_client'],
 
-    version='0.1',
+    version='0.1.1',
 
-    description='A python client for ECS (https://ecs.eacg.de) to manage open source code compliance',
+    description='A python client for ECS (https://app.trustsource.io) to manage open source code compliance',
 
     author='EACG GmbH',
 
@@ -17,7 +17,7 @@ setup(
 
     download_url='',
 
-    keywords=['scanning', 'dependencies', 'modules', 'ECS'],
+    keywords=['scanning', 'dependencies', 'modules', 'ECS', 'TrustSource'],
 
     classifiers=[],
 

@@ -7,11 +7,12 @@ class ECSClient:
     def __init__(self, tool_name, Scanner):
         self._tool_name = tool_name
         self._scan_path = os.getcwd()
-
+        
         self._userName = ''
         self._apiKey = ''
         self._projectName = ''
         self._skipTransfer = False
+        self._baseUrl = 'https://app.trustsource.io'
 
         self._scanner = Scanner(self)
 
@@ -56,6 +57,7 @@ class ECSClient:
                     print(err.message)
                 exit(2)
 
+        self._baseUrl = settings.get('baseUrl', 'https://app.trustsource.io')
         self._skipTransfer = settings.get('skipTransfer', False)
         self._projectName = settings.get('project', '')
         self._userName = settings.get('userName', '')
@@ -84,7 +86,7 @@ class ECSClient:
                 'X-APIKEY': self._apiKey
             }
 
-            response = requests.post('https://ecs-app.eacg.de/api/v1/scans', json=scanInfo, headers=headers)
+            response = requests.post(self._baseUrl + '/api/v1/scans', json=scanInfo, headers=headers)
 
             if response.status_code == 201:
                 exit(0)
