@@ -1,23 +1,23 @@
 from setuptools import setup
 
 setup(
-    name='ecs-python-client',
+    name='ts-python-client',
 
-    packages=['ecs_python_client'],
+    packages=['ts_python_client'],
 
-    version='0.1.1',
+    version='1.0.0',
 
-    description='A python client for ECS (https://app.trustsource.io) to manage open source code compliance',
+    description='A python client for TrustSource (https://app.trustsource.io) to manage open source code compliance',
 
     author='EACG GmbH',
 
-    license='MIT',
+    license='ASL-2.0',
 
-    url='https://github.com/eacg-gmbh/ecs-python-client.git',
+    url='https://github.com/trustsource/ts-python-client.git',
 
     download_url='',
 
-    keywords=['scanning', 'dependencies', 'modules', 'ECS', 'TrustSource'],
+    keywords=['scanning', 'dependencies', 'modules', 'TrustSource'],
 
     classifiers=[],
 

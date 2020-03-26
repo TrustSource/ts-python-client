@@ -1,6 +1,6 @@
 import os, sys, getopt, json, requests
 
-class ECSClient:
+class TSClient:
     def usage(self):
         print 'usage: {} <project folder>'.format(self._tool_name)
 
@@ -13,7 +13,6 @@ class ECSClient:
         self._projectName = ''
         self._skipTransfer = False
         self._baseUrl = 'https://app.trustsource.io'
-
         self._scanner = Scanner(self)
 
     @property
@@ -42,9 +41,9 @@ class ECSClient:
             self.usage()
             exit(2)
 
-        settings_path = os.path.join(self._scan_path, 'ecs-plugin.json')
+        settings_path = os.path.join(self._scan_path, 'ts-plugin.json')
         if not os.path.exists(settings_path) or not os.path.isfile(settings_path):
-            print('Cannot find project settings \'ecs-plugin.json\' in \'' + settings_path + '\'')
+            print('Cannot find project settings \'ts-plugin.json\' in \'' + settings_path + '\'')
             exit(2)
 
         settings = {}
@@ -52,7 +51,7 @@ class ECSClient:
             try:
                 settings = json.load(settings_file)
             except Exception as err:
-                print('Cannot read \'ecs-plugin.json\'')
+                print('Cannot read \'ts-plugin.json\'')
                 if err.message != '':
                     print(err.message)
                 exit(2)
@@ -63,13 +62,13 @@ class ECSClient:
         self._userName = settings.get('userName', '')
         self._apiKey = settings.get('apiKey', '')
 
-        if (self._userName == '') and (self._apiKey == ''):
+        if self._apiKey == '':
             credentials_path = settings.get('credentials', None)
             if credentials_path is not None:
                 try:
                     with open(os.path.join(self._scan_path, credentials_path)) as credentials_file:
                         credentials = json.load(credentials_file)
-                        self._userName = credentials.get('userName', '')
+                        # self._userName = credentials.get('userName', ''), removed by jTh 02/2020
                         self._apiKey = credentials.get('apiKey', '')
                 except Exception as err:
                     if err.message != '':
@@ -81,14 +80,15 @@ class ECSClient:
             headers = {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
-                'User-Agent': '%/0.1.0'.format(self._tool_name),
-                'X-USER': self._userName,
+                'User-Agent': '%/1.0.0'.format(self._tool_name),
+                # 'X-USER': self._userName, removed by jTh 02/2020
                 'X-APIKEY': self._apiKey
             }
 
             response = requests.post(self._baseUrl + '/api/v1/scans', json=scanInfo, headers=headers)
 
             if response.status_code == 201:
+                print("Transfer succees!")
                 exit(0)
             else:
                 print(json.dumps(response.content, indent=2))
