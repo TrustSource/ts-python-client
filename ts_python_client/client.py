@@ -1,8 +1,13 @@
-import os, sys, getopt, json, requests
+import os
+import sys
+import getopt
+import json
+import requests
+
 
 class TSClient:
     def usage(self):
-        print 'usage: {} <project folder>'.format(self._tool_name)
+        print('usage: {} <project folder>'.format(self._tool_name))
 
     def __init__(self, tool_name, Scanner):
         self._tool_name = tool_name
@@ -52,8 +57,7 @@ class TSClient:
                 settings = json.load(settings_file)
             except Exception as err:
                 print('Cannot read \'ts-plugin.json\'')
-                if err.message != '':
-                    print(err.message)
+                print(err)
                 exit(2)
 
         self._baseUrl = settings.get('baseUrl', 'https://app.trustsource.io')
@@ -71,8 +75,7 @@ class TSClient:
                         # self._userName = credentials.get('userName', ''), removed by jTh 02/2020
                         self._apiKey = credentials.get('apiKey', '')
                 except Exception as err:
-                    if err.message != '':
-                        print(err.message)
+                    print(err)
 
         scanInfo = self._scanner.run()
 
@@ -88,7 +91,7 @@ class TSClient:
             response = requests.post(self._baseUrl + '/api/v1/scans', json=scanInfo, headers=headers)
 
             if response.status_code == 201:
-                print("Transfer succees!")
+                print("Transfer success!")
                 exit(0)
             else:
                 print(json.dumps(response.content, indent=2))
