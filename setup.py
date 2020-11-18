@@ -5,7 +5,7 @@ setup(
 
     packages=['ts_python_client'],
 
-    version='1.0.0',
+    version='1.0.1',
 
     description='A python client for TrustSource (https://app.trustsource.io) to manage open source code compliance',
 

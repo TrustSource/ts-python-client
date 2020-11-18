@@ -46,10 +46,13 @@ class TSClient:
             self.usage()
             exit(2)
 
+        # Do the actual scan
+        scanInfo = self._scanner.run()
+
         settings_path = os.path.join(self._scan_path, 'ts-plugin.json')
         if not os.path.exists(settings_path) or not os.path.isfile(settings_path):
-            print('Cannot find project settings \'ts-plugin.json\' in \'' + settings_path + '\'')
-            exit(2)
+            print(json.dumps(scanInfo, indent=2))
+            return
 
         settings = {}
         with open(settings_path) as settings_file:
@@ -77,8 +80,6 @@ class TSClient:
                 except Exception as err:
                     print(err)
 
-        scanInfo = self._scanner.run()
-
         if not self._skipTransfer:
             headers = {
                 'Accept': 'application/json',
@@ -92,7 +93,7 @@ class TSClient:
 
             if response.status_code == 201:
                 print("Transfer success!")
-                exit(0)
+                return
             else:
                 print(json.dumps(response.content, indent=2))
                 exit(2)
