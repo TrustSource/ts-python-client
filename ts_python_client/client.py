@@ -46,22 +46,24 @@ class TSClient:
             self.usage()
             exit(2)
 
-        # Do the actual scan
-        scanInfo = self._scanner.run()
 
+        settings = {}
         settings_path = os.path.join(self._scan_path, 'ts-plugin.json')
-        if not os.path.exists(settings_path) or not os.path.isfile(settings_path):
+
+        if os.path.exists(settings_path) and os.path.isfile(settings_path):
+            with open(settings_path) as settings_file:
+                try:
+                    settings = json.load(settings_file)
+                except Exception as err:
+                    print('Cannot read \'ts-plugin.json\'')
+
+        # Do the actual scan
+        scanInfo = self._scanner.run(settings)
+
+        if not settings:
             print(json.dumps(scanInfo, indent=2))
             return
 
-        settings = {}
-        with open(settings_path) as settings_file:
-            try:
-                settings = json.load(settings_file)
-            except Exception as err:
-                print('Cannot read \'ts-plugin.json\'')
-                print(err)
-                exit(2)
 
         self._baseUrl = settings.get('baseUrl', 'https://app.trustsource.io')
         self._skipTransfer = settings.get('skipTransfer', False)
