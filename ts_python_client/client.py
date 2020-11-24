@@ -91,13 +91,15 @@ class TSClient:
                 'X-APIKEY': self._apiKey
             }
 
+            scanInfo['project'] = self._projectName
+
             response = requests.post(self._baseUrl + '/api/v1/scans', json=scanInfo, headers=headers)
 
             if response.status_code == 201:
                 print("Transfer success!")
                 return
             else:
-                print(json.dumps(response.content, indent=2))
+                print(json.dumps(response.text, indent=2))
                 exit(2)
         else:
             print(json.dumps(scanInfo, indent=2))
