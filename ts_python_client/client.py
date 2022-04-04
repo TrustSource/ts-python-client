@@ -2,102 +2,136 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import os
 import sys
 import getopt
 import json
 import requests
 
+from pathlib import Path
+from .scan import Scan
 
-class TSClient:
-    def usage(self):
-        print('usage: {} <project folder>'.format(self._tool_name))
+class Scanner(object):
+    def __init__(self):
+        self._client = None
 
-    def __init__(self, tool_name, Scanner):
+    @property
+    def client(self):
+        return self._client
+
+    @client.setter
+    def client(self, value):
+        self._client = value
+
+    @property
+    def is_folder_scanner(self):
+        return True
+
+    def run(self) -> Scan:
+        raise NotImplemented()
+
+
+
+class Client(object):
+    class Settings:
+        def __init__(self):
+            self.apiKey = ''
+            self.projectName = ''
+            self.baseUrl = 'https://app.trustsource.io'
+            self.skipTransfer = False
+            self.data = {}
+
+
+        def load(self, path: Path):
+            if not path.exists():
+                return
+
+            try:
+                with path.open('r') as fp:
+                    self.data = json.load(fp)
+            except Exception as err:
+                print('Error loading settings file: {}'.format(err))
+
+            self.apiKey = self.data.get('apiKey', self.apiKey)
+            self.projectName = self.data.get('project', self.projectName)
+            self.baseUrl = self.data.get('baseUrl', self.baseUrl)
+            self.skipTransfer = self.data.get('skipTransfer', self.skipTransfer)
+
+            if not self.apiKey:
+                credentials = self.data.get('credentials', '')
+                if credentials:
+                    credentials_path = path / credentials
+                    if credentials_path.exists() and credentials_path.is_file():
+                        try:
+                            with credentials_path.open() as fp:
+                                credentials = json.load(fp)
+                                self.apiKey = credentials.get('apiKey', self.apiKey)
+
+                        except Exception as err:
+                            print('Error loading credentials: {}'.format(err))
+
+    ##############
+
+    def __init__(self, tool_name: str, scanner: Scanner):
+        self._path = Path.cwd()
         self._tool_name = tool_name
-        self._scan_path = os.getcwd()
-        
-        self._userName = ''
-        self._apiKey = ''
-        self._projectName = ''
-        self._skipTransfer = False
-        self._baseUrl = 'https://app.trustsource.io'
-        self._scanner = Scanner(self)
+        self._settings = Client.Settings()
+
+        self._scanner = scanner
+        self._scanner.client = self
+
 
     @property
-    def projectName(self):
-        return self._projectName
+    def path(self) -> Path:
+        return self._path
 
     @property
-    def scanPath(self):
-        return self._scan_path
-
-    def run(self, args):
-        try:
-            opts, args = getopt.getopt(args, '', [])
-        except getopt.GetoptError:
-            self.usage()
-            sys.exit(2)
-
-        if len(args) > 1:
-            self.usage()
-            exit(2)
-        elif len(args) == 1:
-            self._scan_path = args[0]
-
-        if not os.path.isdir(self._scan_path):
-            print('\'' + self._scan_path + '\'' + ' is not a folder')
-            self.usage()
-            exit(2)
+    def settings(self):
+        return self._settings
 
 
-        settings = {}
-        settings_path = os.path.join(self._scan_path, 'ts-plugin.json')
+    def run(self, path: str = '', apiKey = '', projectName = '', skipTransfer = True, settingsFile = '', outputFile = ''):
+        if path:
+            self._path = Path(path)
 
-        if os.path.exists(settings_path) and os.path.isfile(settings_path):
-            with open(settings_path) as settings_file:
-                try:
-                    settings = json.load(settings_file)
-                except Exception as err:
-                    print('Cannot read \'ts-plugin.json\'')
+        if settingsFile:
+            self._settings.load(Path(settingsFile))
+        elif self._scanner.is_folder_scanner and self._path.is_dir():
+            self._settings.load(self._path / 'ts-plugin.json')
+
+        if apiKey:
+            self._settings.apiKey = apiKey
+
+        if projectName:
+            self._settings.projectName = projectName
+
+        if skipTransfer:
+            self._settings.skipTransfer = skipTransfer
+
 
         # Do the actual scan
-        scanInfo = self._scanner.run(settings)
+        scan = None
 
-        if not settings:
-            print(json.dumps(scanInfo, indent=2))
-            return
+        try:
+            scan = self._scanner.run()
+        except ValueError as err:
+            print(err)
+            exit(2)
 
+        if not scan:
+            exit(2)
 
-        self._baseUrl = settings.get('baseUrl', 'https://app.trustsource.io')
-        self._skipTransfer = settings.get('skipTransfer', False)
-        self._projectName = settings.get('project', '')
-        self._userName = settings.get('userName', '')
-        self._apiKey = settings.get('apiKey', '')
+        scan.project = self._settings.projectName
 
-        if self._apiKey == '':
-            credentials_path = settings.get('credentials', None)
-            if credentials_path is not None:
-                try:
-                    with open(os.path.join(self._scan_path, credentials_path)) as credentials_file:
-                        credentials = json.load(credentials_file)
-                        # self._userName = credentials.get('userName', ''), removed by jTh 02/2020
-                        self._apiKey = credentials.get('apiKey', '')
-                except Exception as err:
-                    print(err)
-
-        if not self._skipTransfer:
+        # Submit scan info
+        if not self._settings.skipTransfer:
             headers = {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
-                'User-Agent': '%/1.0.0'.format(self._tool_name),
-                # 'X-USER': self._userName, removed by jTh 02/2020
-                'X-APIKEY': self._apiKey
+                'User-Agent': '{}/1.0.0'.format(self._tool_name),
+                'X-APIKEY': self._settings.apiKey
             }
 
-            scanInfo['project'] = self._projectName
-
-            response = requests.post(self._baseUrl + '/api/v1/scans', json=scanInfo, headers=headers)
+            response = requests.post(self._settings.baseUrl + '/api/v1/scans', data=scan.json, headers=headers)
 
             if response.status_code == 201:
                 print("Transfer success!")
@@ -105,5 +139,9 @@ class TSClient:
             else:
                 print(json.dumps(response.text, indent=2))
                 exit(2)
+        elif outputFile:
+            output = Path(outputFile)
+            with output.open('w') as fp:
+                fp.write(scan.json)
         else:
-            print(json.dumps(scanInfo, indent=2))
+            print(scan.json)
