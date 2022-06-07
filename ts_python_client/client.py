@@ -15,11 +15,11 @@ class Scanner(object):
         self._client = None
 
     @property
-    def client(self):
+    def client(self) -> 'Client':
         return self._client
 
     @client.setter
-    def client(self, value):
+    def client(self, value: 'Client'):
         self._client = value
 
     @property
@@ -89,7 +89,7 @@ class Client(object):
         return self._settings
 
 
-    def run(self, path: str = '', apiKey = '', projectName = '', skipTransfer = True, settingsFile = '', outputFile = ''):
+    def run(self, path: str = '', baseUrl='', apiKey = '', projectName = '', skipTransfer = True, settingsFile = '', outputFile = ''):
         if path:
             self._path = Path(path)
 
@@ -97,6 +97,9 @@ class Client(object):
             self._settings.load(Path(settingsFile))
         elif self._scanner.is_folder_scanner and self._path.is_dir():
             self._settings.load(self._path / 'ts-plugin.json')
+
+        if baseUrl:
+            self._settings.baseUrl = baseUrl
 
         if apiKey:
             self._settings.apiKey = apiKey
