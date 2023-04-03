@@ -1,17 +1,10 @@
-import enum
 import json
 import requests
-import click
 
 from pathlib import Path
-from typing import Callable, Optional
-
-from . import Command
-
+from click import Command
 
 class UploadCommand(Command):
-    # Impl = Callable[[dict, ...], None]
-
     baseUrl = 'https://app.trustsource.io'
 
     def __init__(self, *args, **kwargs):
@@ -23,7 +16,13 @@ class UploadCommand(Command):
         self.tool_name = 'ts-python-client'
         self.tool_version = '2.0.0'
 
+    # Type hint not used due to issues with earlier Python versions
+    # Impl = Callable[[Union[List[dict], dict], ...], None]
     def impl(self, impl) -> 'UploadCommand':
+        """
+        :param impl: Callable[[Union[List[dict], dict], ...], None]
+        :return: self
+        """
         self.__impl = impl
         return self
 
@@ -33,17 +32,25 @@ class UploadCommand(Command):
     #     return self
 
     def run(self, path: Path, project_name: str, base_url: str, api_key: str, *args, **kwargs):
+        if self.__impl:
+            impl = lambda _d: self.__impl(_d, base_url, api_key, *args, **kwargs)
+        else:
+            impl = lambda _d: self.default(_d, base_url, api_key)
+
         with path.open('r') as fp:
             if data := json.load(fp):
-                data['project'] = project_name
+                if type(data) is list:
+                    for d in data:
+                        d['project'] = project_name
+                        impl(d)
+                elif type(data) is dict:
+                    data['project'] = project_name
+                    impl(data)
+                else:
+                    raise ValueError('Unexpected scan type')
             else:
                 print("Cannot load scan data")
                 exit(2)
-
-        if impl := self.__impl:
-            impl(data, base_url, api_key, *args, **kwargs)
-        else:
-            self.default(data, base_url, api_key)
 
 
     def default(self, data: dict, base_url: str, api_key: str, *args, **kwargs):

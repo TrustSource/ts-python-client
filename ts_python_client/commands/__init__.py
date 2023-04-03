@@ -5,12 +5,13 @@
 
 import click
 
-class Command(click.Command):
-    def parse_opts_from_args(self, args: [str]):
-        ctx = self.context_class(self)
-        with ctx:
-            parser = self.make_parser(ctx)
-            values, _, order = parser.parse_args(args)
 
-        opts = {k: d for (k, d), ty in zip(values.items(), order) if isinstance(ty, click.Option)}
-        return opts
+def parse_cmd_opts_from_args(cmd: click.Command, args: [str]):
+    ctx = cmd.context_class(cmd)
+    with ctx:
+        parser = cmd.make_parser(ctx)
+        values, _, order = parser.parse_args(args)
+
+    opts = {k: d for (k, d), ty in zip(values.items(), order) if isinstance(ty, click.Option)}
+    return opts
+
