@@ -15,13 +15,7 @@ def start():
 @click.option('-o', '--output', 'output_path', required=False, type=click.Path(path_type=pathlib.Path), help='Output path for the scan')
 @click.argument('path', type=click.Path(exists=True, path_type=pathlib.Path), nargs=-1)
 def scan(path, output_path, *args, **kwargs):
-    if not (paths := list(path)):
-        for line in sys.stdin:
-            p = pathlib.Path(line.rstrip('\n'))
-            if p.exists():
-                paths.append(p)
-
-    scan.run(paths, output_path, *args, **kwargs)
+    scan.run(list(path), output_path, *args, **kwargs)
 
 
 @start.command(cls=UploadCommand)
