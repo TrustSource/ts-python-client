@@ -7,7 +7,7 @@ setup(
         'ts_python_client',
         'ts_python_client.commands'
     ],
-    version='2.0.2',
+    version='2.0.3',
     description='A python client for TrustSource (https://app.trustsource.io) to manage open source code compliance',
     author='EACG GmbH',
     license='Apache-2.0',
@@ -17,7 +17,7 @@ setup(
     classifiers=[],
     install_requires=[
         'requests',
-        'click==8.0.3'
+        'click==8.1.3'
     ],
     scripts=[],
     entry_points={}
