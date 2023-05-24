@@ -7,7 +7,7 @@ setup(
         'ts_python_client',
         'ts_python_client.commands'
     ],
-    version='2.0.3',
+    version='2.0.4',
     description='A python client for TrustSource (https://app.trustsource.io) to manage open source code compliance',
     author='EACG GmbH',
     license='Apache-2.0',

@@ -6,7 +6,6 @@ from .commands.ScanCommand import ScanCommand
 from .commands.UploadCommand import UploadCommand
 
 @click.group()
-@click.version_option()
 def _start():
     pass
 
