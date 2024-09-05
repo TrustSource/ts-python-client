@@ -39,6 +39,7 @@ class ScanCommand(Command):
                     data.append(s.to_dict())
 
             if output_path:
+                output_path = output_path.resolve()
                 with output_path.open('w') as fp:
                     json.dump(data, fp, indent=2)
             else:
