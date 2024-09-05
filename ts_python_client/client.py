@@ -36,7 +36,7 @@ class Client(object):
         def __init__(self):
             self.apiKey = ''
             self.projectName = ''
-            self.baseUrl = 'https://app.trustsource.io'
+            self.baseUrl = 'https://api.trustsource.io/v2'
             self.skipTransfer = False
             self.data = {}
 
@@ -131,10 +131,10 @@ class Client(object):
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
                 'User-Agent': '{}/1.0.0'.format(self._tool_name),
-                'X-APIKEY': self._settings.apiKey
+                'x-api-key': self._settings.apiKey
             }
 
-            response = requests.post(self._settings.baseUrl + '/api/v1/scans', data=scan.json, headers=headers)
+            response = requests.post(self._settings.baseUrl + '/core/scans', data=scan.json, headers=headers)
 
             if response.status_code == 201:
                 print("Transfer success!")
