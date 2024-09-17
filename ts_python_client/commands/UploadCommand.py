@@ -5,7 +5,7 @@ from pathlib import Path
 from click import Command
 
 class UploadCommand(Command):
-    baseUrl = 'https://app.trustsource.io'
+    baseUrl = 'https://api.trustsource.io/v2'
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -14,7 +14,7 @@ class UploadCommand(Command):
         self.__preprocess = None
 
         self.tool_name = 'ts-python-client'
-        self.tool_version = '2.0.0'
+        self.tool_version = '2.0.5'
 
     # Type hint not used due to issues with earlier Python versions
     # Impl = Callable[[Union[List[dict], dict], ...], None]
@@ -58,10 +58,10 @@ class UploadCommand(Command):
             'Accept': 'application/json',
             'Content-Type': 'application/json',
             'User-Agent': f'{self.tool_name}/{self.tool_version}',
-            'X-APIKEY': api_key
+            'x-api-key': api_key
         }
 
-        response = requests.post(base_url + '/api/v1/scans', json=data, headers=headers)
+        response = requests.post(base_url + '/core/scans', json=data, headers=headers)
 
         if response.status_code == 201:
             print("Transfer success!")
