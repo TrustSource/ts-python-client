@@ -1,4 +1,5 @@
-[![Gitter](https://badges.gitter.im/TrustSource/community.svg)](https://gitter.im/TrustSource/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+> [!WARNING]
+> **PLEASE NOTE:** We stopped further development on this client. You may still use it, but it will only receive bug fixes. Starting Q4/2024 we decided to focus all efforts on developing [ts-scan](https://github.com/trustsource/ts-scan), which also covers all capabilities of this solution. 
 
 # TrustSource Python Client
 [TrustSource](https://app.trustsource.io) - a platform to manage open source compliance - uses a two layered approach to scan and transfer dependencies from a package manager to TrustSource. The package manager specific impelmentation, e.g. PIP plugin, and an unspecific client handling data preparation, transfer and security.
